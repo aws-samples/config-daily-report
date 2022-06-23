@@ -17,7 +17,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from typing_extensions import runtime
 from async_timeout import timeout
 from aws_cdk.aws_events import Rule, Schedule
-import aws_cdk.aws_events_targets as targets
 from aws_cdk.aws_iam import Role
 from aws_cdk import (
     Duration,
@@ -25,6 +24,8 @@ from aws_cdk import (
     aws_lambda_python_alpha as lambda_,
     aws_lambda,
     aws_iam as iam,
+    triggers as triggers,
+    aws_events_targets as targets
 )
 import aws_cdk
 from constructs import Construct
@@ -56,8 +57,22 @@ class DailyConfigReporter(Stack):
             default='SENDER@EMAIL.COM',
             description="SES sender email address"
         )
+        HOUR = aws_cdk.CfnParameter(
+            self,
+            "HOUR",
+            type="String",
+            default='23',
+            description="The time (hour) the Lambda will run. For example: for 23:50 UTC, type 23"
+        )
+        MINUTE = aws_cdk.CfnParameter(
+            self,
+            "MINUTE",
+            type="String",
+            default='50',
+            description="The time (minute) the Lambda will run. For example: for 23:50 UTC, type 50"
+        )
         config_reporter_lambda = lambda_.PythonFunction(self, "config_reporter",
-            entry="../src/",  # required
+            entry="../src/", 
             runtime=aws_lambda.Runtime.PYTHON_3_8, 
             index="config_reporter.py", 
             handler="config_reporter",
@@ -78,6 +93,7 @@ class DailyConfigReporter(Stack):
             ],
         ))
         rule = Rule(self, "ConfigDailyReporterCW",
-        schedule=Schedule.cron(minute="50", hour="20")
+        schedule=Schedule.cron(minute=MINUTE.value_as_string, hour=HOUR.value_as_string)
     )
         rule.add_target(targets.LambdaFunction(config_reporter_lambda))
+        trigger = triggers.Trigger(self, "TriggerLambda", handler=config_reporter_lambda)

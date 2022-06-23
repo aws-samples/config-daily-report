@@ -14,7 +14,7 @@ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTIO
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-
+import os
 import boto3
 import datetime
 import json
@@ -67,7 +67,7 @@ def send_email(today, SENDER, RECIPIENT):
     # The subject line for the email.
     SUBJECT = f"AWS Config changes report {today}"
     ATTACHMENT = filename
-    BODY_TEXT = "Hello,\r\nPlease see the attached file which includes the contains made during the last 24 hours."
+    BODY_TEXT = "Hello,\r\nPlease see the attached file which includes the contains made during the last day."
 
     # The HTML body of the email.
     BODY_HTML = """\
@@ -75,7 +75,7 @@ def send_email(today, SENDER, RECIPIENT):
     <head></head>
     <body>
     <h1>Hello!</h1>
-    <p>Hello, please see the attached file which contains the changes made during the last 24 hours.</p>
+    <p>Hello, please see the attached file which contains the changes made during the last day.</p>
     </body>
     </html>
     """
