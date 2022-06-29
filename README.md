@@ -26,13 +26,15 @@ The reporter is triggered using a Cloudwatch event, that will trigger a Lambda f
 1. ```git clone https://github.com/aws-samples/config-daily-report```
 2. ```cd config-daily-reporter/cdk```
 3. ```cdk bootstrap```
-4. ```cdk deploy --parameters aggregator=<aggregator name> --parameters RECIPIENT=<recipient email address> --parameters SENDER=<sender email address>```
-
-Replace the parameters as follows:
-
-* aggregator - Name of AWS Config Aggregator.
-* RECIPIENT - Email recipient that will get the csv report.
-* SENDER - Email sender as configured on SES.
+4. ```cdk deploy --parameters aggregator=<aggregator name> \ --parameters RECIPIENT=<recipient email address> \ --parameters SENDER=<sender email address> \ --parameters HOUR=<time in UTC (hour)> \ --parameters MINUTE==< time in UTC (minute)>```  
+    Replace the parameters as follows:
+    * aggregator - Name of AWS Config Aggregator.
+    * RECIPIENT - Email recipient that will get the csv report.
+    * SENDER - Email sender as configured on SES.
+    * HOUR - The hour (UTC) the Lambda will run.
+    * MINUTE - The minute (UTC) the Lambda will run.
+5. The deployment will generate a report.
+6. Check your email inbox.
 
 
 
