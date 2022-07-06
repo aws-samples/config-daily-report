@@ -25,10 +25,12 @@ from aws_cdk import (
     aws_lambda,
     aws_iam as iam,
     triggers as triggers,
-    aws_events_targets as targets
+    aws_events_targets as targets,
+    aws_logs as logs
 )
 import aws_cdk
 from constructs import Construct
+
 
 class DailyConfigReporter(Stack):
 
@@ -72,16 +74,18 @@ class DailyConfigReporter(Stack):
             description="The time (minute) the Lambda will run. For example: for 23:50 UTC, type 50"
         )
         config_reporter_lambda = lambda_.PythonFunction(self, "config_reporter",
-            entry="../src/", 
-            runtime=aws_lambda.Runtime.PYTHON_3_8, 
-            index="config_reporter.py", 
-            handler="config_reporter",
-            timeout=Duration.seconds(60),
-            environment={
-        "aggregator_name": aggregator.value_as_string,
-        "SENDER": SENDER.value_as_string,
-        "RECIPIENT": RECIPIENT.value_as_string}
-        )
+                                                        log_retention=logs.RetentionDays.ONE_MONTH,
+                                                        entry="../src/",
+                                                        runtime=aws_lambda.Runtime.PYTHON_3_8,
+                                                        index="config_reporter.py",
+                                                        handler="config_reporter",
+                                                        timeout=Duration.seconds(
+                                                            60),
+                                                        environment={
+                                                            "aggregator_name": aggregator.value_as_string,
+                                                            "SENDER": SENDER.value_as_string,
+                                                            "RECIPIENT": RECIPIENT.value_as_string}
+                                                        )
         config_reporter_lambda.add_to_role_policy(iam.PolicyStatement(
             effect=iam.Effect.ALLOW,
             actions=[
@@ -93,7 +97,9 @@ class DailyConfigReporter(Stack):
             ],
         ))
         rule = Rule(self, "ConfigDailyReporterCW",
-        schedule=Schedule.cron(minute=MINUTE.value_as_string, hour=HOUR.value_as_string)
-    )
+                    schedule=Schedule.cron(
+                        minute=MINUTE.value_as_string, hour=HOUR.value_as_string)
+                    )
         rule.add_target(targets.LambdaFunction(config_reporter_lambda))
-        trigger = triggers.Trigger(self, "TriggerLambda", handler=config_reporter_lambda)
+        trigger = triggers.Trigger(
+            self, "TriggerLambda", handler=config_reporter_lambda)
