@@ -1,7 +1,7 @@
 
 # AWS Config Daily Reporter
  
-The Config Daily Reporter solution can be used in order to generate a daily CSV report at 8:50 PM UTC.
+The Config Daily Reporter solution can be used in order to generate a daily CSV report.
 The report will include new or changed resources, with a link to the AWS Config UI.
 The reporter is triggered using a Cloudwatch event, that will trigger a Lambda function. The Lambda will use SES to send an email.
 
@@ -13,7 +13,7 @@ The reporter is triggered using a Cloudwatch event, that will trigger a Lambda f
 
 
 ### Architecture
-1. Amazon CloudWatch event - will trigger Lambda every day at 8:50 PM UTC.
+1. Amazon CloudWatch event - will trigger Lambda every day
 2. AWS Lambda - will run Python3 code which includes an AWS Config Query and SendEmail using SES.
 3. AWS Config - aggregator which will get a query from the Lambda function.
 4. Amazon Simple Email Service - will be used to send an email with the CSV file.
