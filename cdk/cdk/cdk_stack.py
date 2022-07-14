@@ -82,19 +82,36 @@ class DailyConfigReporter(Stack):
                                                         timeout=Duration.seconds(
                                                             60),
                                                         environment={
-                                                            "aggregator_name": aggregator.value_as_string,
+                                                            "AGGREGATOR_NAME": aggregator.value_as_string,
                                                             "SENDER": SENDER.value_as_string,
                                                             "RECIPIENT": RECIPIENT.value_as_string}
                                                         )
         config_reporter_lambda.add_to_role_policy(iam.PolicyStatement(
             effect=iam.Effect.ALLOW,
             actions=[
-                'config:SelectAggregateResourceConfig',
-                'ses:SendRawEmail'
+                'ses:SendRawEmail',
+                "ses:SendEmail"
             ],
             resources=[
-                '*',
+                '*', ],
+            conditions={
+                "ForAllValues:StringLike": {
+                    "ses:Recipients": RECIPIENT.value_as_string,
+                },
+                "StringLike": {
+                    "ses:FromAddress": SENDER.value_as_string
+                }
+            }
+
+        ))
+
+        config_reporter_lambda.add_to_role_policy(iam.PolicyStatement(
+            effect=iam.Effect.ALLOW,
+            actions=[
+                'config:SelectAggregateResourceConfig'
             ],
+            resources=[
+                '*', ]
         ))
         rule = Rule(self, "ConfigDailyReporterCW",
                     schedule=Schedule.cron(

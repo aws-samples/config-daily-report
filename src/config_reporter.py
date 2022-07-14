@@ -25,32 +25,31 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 
 today = datetime.datetime.now().strftime("%Y-%m-%d")  # Currnent day
-aggregator_name = os.environ['aggregator_name']  # AWS Config Aggregator name
+filename = f'/tmp/changed_resources-{today}.csv'  # CSV report filename
+AGGREGATOR_NAME = os.environ['AGGREGATOR_NAME']  # AWS Config Aggregator name
 SENDER = os.environ['SENDER']  # SES Sender address
 RECIPIENT = os.environ['RECIPIENT']  # SES Recipient address
-filename = f'/tmp/changed_resources-{today}.csv'  # CSV report filename
 
 # Generate the resource link to AWS Console UI
-def get_link(AWS_REGION, RESOURCE_ID, RESOURCE_TYPE):
-    url = f'https://{AWS_REGION}.console.aws.amazon.com/config/home?region={AWS_REGION}#/resources/timeline?resourceId={RESOURCE_ID}&resourceType={RESOURCE_TYPE}'
-    return url
+def get_link(aws_region, resource_id, resource_type):
+    return f'https://{aws_region}.console.aws.amazon.com/config/home?region={aws_region}#/resources/timeline?resourceId={resource_id}&resourceType={resource_type}'
 
 
 # Generate the CSV Report
-def create_report(aggregator_name, today):
+def create_report(AGGREGATOR_NAME, today, filename):
     client = boto3.client('config')
     response = client.select_aggregate_resource_config(
         Expression=f"SELECT * WHERE configurationItemCaptureTime LIKE '{today}%'",
-        ConfigurationAggregatorName=aggregator_name
+        ConfigurationAggregatorName=AGGREGATOR_NAME
     )
     changed_resources = response["Results"]
     json_list = [json.loads(line) for line in changed_resources]
     # Transform the JSON response to CSV file
     for resource in json_list:
-        AWS_REGION = resource['awsRegion']
-        RESOURCE_ID = resource['resourceId']
-        RESOURCE_TYPE = resource['resourceType']
-        resource['Link'] = get_link(AWS_REGION, RESOURCE_ID, RESOURCE_TYPE)
+        aws_region = resource['awsRegion']
+        resource_id = resource['resourceId']
+        resource_type = resource['resourceType']
+        resource['Link'] = get_link(aws_region, resource_id, resource_type)
         print(resource)
     all_fields = set()
     for item in json_list:
@@ -63,7 +62,7 @@ def create_report(aggregator_name, today):
     print("Report generated " + filename)
 
 
-def send_email(today, SENDER, RECIPIENT):
+def send_email(today, SENDER, RECIPIENT, filename):
     # The subject line for the email.
     SUBJECT = f"AWS Config changes report {today}"
     ATTACHMENT = filename
@@ -74,7 +73,6 @@ def send_email(today, SENDER, RECIPIENT):
     <html>
     <head></head>
     <body>
-    <h1>Hello!</h1>
     <p>Hello, please see the attached file which contains the changes made during the last day.</p>
     </body>
     </html>
@@ -95,25 +93,21 @@ def send_email(today, SENDER, RECIPIENT):
                    filename=os.path.basename(ATTACHMENT))
     msg.attach(msg_body)
     msg.attach(att)
-    try:
-        # Provide the contents of the email.
-        response = client.send_raw_email(
-            Source=SENDER,
-            Destinations=[
-                RECIPIENT
-            ],
-            RawMessage={
-                'Data': msg.as_string(),
-            }
-        )
-    # Display an error if something goes wrong.
-    except ClientError as e:
-        print(e.response['Error']['Message'])
-    else:
-        print("Email sent! Message ID:"),
-        print(response['MessageId'])
+    # Provide the contents of the email.
+    response = client.send_raw_email(
+        Source=SENDER,
+        Destinations=[
+            RECIPIENT
+        ],
+        RawMessage={
+            'Data': msg.as_string(),
+        }
+    )
+# Display an error if something goes wrong.
+    print("Email sent! Message ID:"),
+    print(response['MessageId'])
 
 
 def config_reporter(event, lambda_context):
-    create_report(aggregator_name, today)
-    send_email(today, SENDER, RECIPIENT)
+    create_report(AGGREGATOR_NAME, today, filename)
+    send_email(today, SENDER, RECIPIENT, filename)
