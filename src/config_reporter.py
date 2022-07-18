@@ -1,4 +1,3 @@
-
 """
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 SPDX-License-Identifier: MIT-0
@@ -14,9 +13,10 @@ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTIO
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+from distutils.command.config import config
 import os
 import boto3
-import datetime
+from datetime import datetime
 import json
 import csv
 from botocore.exceptions import ClientError
@@ -24,11 +24,18 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 
-today = datetime.datetime.now().strftime("%Y-%m-%d")  # Currnent day
+# today = datetime.now().strftime("%Y-%m-%d")  # Currnent day
+# filename = f'/tmp/changed_resources-{today}.csv'  # CSV report filename
+# AGGREGATOR_NAME = os.environ['AGGREGATOR_NAME']  # AWS Config Aggregator name
+# SENDER = os.environ['SENDER']  # SES Sender address
+# RECIPIENT = os.environ['RECIPIENT']  # SES Recipient address
+
+
+today = datetime.now().strftime("%Y-%m-%d")  # Currnent day
 filename = f'/tmp/changed_resources-{today}.csv'  # CSV report filename
-AGGREGATOR_NAME = os.environ['AGGREGATOR_NAME']  # AWS Config Aggregator name
-SENDER = os.environ['SENDER']  # SES Sender address
-RECIPIENT = os.environ['RECIPIENT']  # SES Recipient address
+AGGREGATOR_NAME = "aggregator"  # AWS Config Aggregator name
+SENDER = "dbbegimh+ses@amazon.com"  # SES Sender address
+RECIPIENT = SENDER  # SES Recipient address
 
 # Generate the resource link to AWS Console UI
 def get_link(aws_region, resource_id, resource_type):
@@ -66,19 +73,19 @@ def send_email(today, SENDER, RECIPIENT, filename):
     # The subject line for the email.
     SUBJECT = f"AWS Config changes report {today}"
     ATTACHMENT = filename
-    BODY_TEXT = "Hello,\r\nPlease see the attached file which includes the contains made during the last day."
+    BODY_TEXT = "Hello,\r\nPlease see the attached file which includes the changes made during the last day."
+    ses = boto3.client('ses')
 
     # The HTML body of the email.
     BODY_HTML = """\
     <html>
     <head></head>
     <body>
-    <p>Hello, please see the attached file which contains the changes made during the last day.</p>
+    <p>Hello, please see the attached file which includes the changes made during the last day.</p>
     </body>
     </html>
     """
     CHARSET = "utf-8"
-    client = boto3.client('ses')
     msg = MIMEMultipart('mixed')
     msg['Subject'] = SUBJECT
     msg['From'] = SENDER
@@ -94,7 +101,7 @@ def send_email(today, SENDER, RECIPIENT, filename):
     msg.attach(msg_body)
     msg.attach(att)
     # Provide the contents of the email.
-    response = client.send_raw_email(
+    response = ses.send_raw_email(
         Source=SENDER,
         Destinations=[
             RECIPIENT
@@ -103,7 +110,6 @@ def send_email(today, SENDER, RECIPIENT, filename):
             'Data': msg.as_string(),
         }
     )
-# Display an error if something goes wrong.
     print("Email sent! Message ID:"),
     print(response['MessageId'])
 
@@ -111,3 +117,8 @@ def send_email(today, SENDER, RECIPIENT, filename):
 def config_reporter(event, lambda_context):
     create_report(AGGREGATOR_NAME, today, filename)
     send_email(today, SENDER, RECIPIENT, filename)
+
+# def config_reporter():
+#     create_report(AGGREGATOR_NAME, today, filename)
+#     send_email(today, SENDER, RECIPIENT, filename)
+# config_reporter()
