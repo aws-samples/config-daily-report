@@ -3,7 +3,7 @@
  
 The Config Daily Reporter solution can be used in order to generate a daily CSV report.
 The report will include new or changed resources, with a link to the AWS Config UI.
-The reporter is triggered using a Cloudwatch event, that will trigger a Lambda function. The Lambda will use SES to send an email.
+The reporter is triggered using a CloudWatch event, that will trigger a Lambda function. The Lambda will use SES to send an email.
 
 
 ### Prerequisites
@@ -26,13 +26,14 @@ The reporter is triggered using a Cloudwatch event, that will trigger a Lambda f
 1. ```git clone https://github.com/aws-samples/config-daily-report```
 2. ```cd config-daily-reporter/cdk```
 3. ```cdk bootstrap```
-4. ```cdk deploy --parameters aggregator=<aggregator name> \ --parameters RECIPIENT=<recipient email address> \ --parameters SENDER=<sender email address> \ --parameters HOUR=<time in UTC (hour)> \ --parameters MINUTE==< time in UTC (minute)>```  
+4. ```cdk deploy --parameters aggregator=<aggregator name> \ --parameters RECIPIENT=<recipient email address> \ --parameters SENDER=<sender email address> \ --parameters HOUR=<time in UTC (hour)> \ --parameters MINUTE==< time in UTC (minute)> \ --parameters sesarn=<Your SES ARN>```  
     Replace the parameters as follows:
     * aggregator - Name of AWS Config Aggregator.
     * RECIPIENT - Email recipient that will get the csv report.
     * SENDER - Email sender as configured on SES.
     * HOUR - The hour (UTC) the Lambda will run.
     * MINUTE - The minute (UTC) the Lambda will run.
+    * sesarn - your preconfigured AWS SES arn.
 5. The deployment will generate a report.
 6. Check your email inbox.
 
