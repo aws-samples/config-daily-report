@@ -24,18 +24,12 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 
-# today = datetime.now().strftime("%Y-%m-%d")  # Currnent day
-# filename = f'/tmp/changed_resources-{today}.csv'  # CSV report filename
-# AGGREGATOR_NAME = os.environ['AGGREGATOR_NAME']  # AWS Config Aggregator name
-# SENDER = os.environ['SENDER']  # SES Sender address
-# RECIPIENT = os.environ['RECIPIENT']  # SES Recipient address
-
-
 today = datetime.now().strftime("%Y-%m-%d")  # Currnent day
 filename = f'/tmp/changed_resources-{today}.csv'  # CSV report filename
-AGGREGATOR_NAME = "aggregator"  # AWS Config Aggregator name
-SENDER = "dbbegimh+ses@amazon.com"  # SES Sender address
-RECIPIENT = SENDER  # SES Recipient address
+AGGREGATOR_NAME = os.environ['AGGREGATOR_NAME']  # AWS Config Aggregator name
+SENDER = os.environ['SENDER']  # SES Sender address
+RECIPIENT = os.environ['RECIPIENT']  # SES Recipient address
+
 
 # Generate the resource link to AWS Console UI
 def get_link(aws_region, resource_id, resource_type):
