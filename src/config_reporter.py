@@ -111,8 +111,3 @@ def send_email(today, SENDER, RECIPIENT, filename):
 def config_reporter(event, lambda_context):
     create_report(AGGREGATOR_NAME, today, filename)
     send_email(today, SENDER, RECIPIENT, filename)
-
-# def config_reporter():
-#     create_report(AGGREGATOR_NAME, today, filename)
-#     send_email(today, SENDER, RECIPIENT, filename)
-# config_reporter()
