@@ -7,9 +7,16 @@ The reporter is triggered using a CloudWatch event, that will trigger a Lambda f
 
 
 ### Prerequisites
-* Amazon Simple Email Service
-* AWS Config Aggregator 
-* AWS CDK
+Before getting started, make sure that you have a basic understating of the following:
+* Amazon EventBridge rule that runs on a schedule
+* Multi-Account Multi-Region Data Aggregation
+* AWS Lambda Function
+* Python and Boto3.
+* CDK environments.
+You will also need to have a pre-configured Multi-Account AWS Config Aggregator and Amazon SES for sending email.
+* A pre-configured AWS Config Aggregator.
+* A pre-configured Amazon SES.
+
 
 
 ### Architecture
