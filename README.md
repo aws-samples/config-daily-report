@@ -5,6 +5,7 @@ The Config Daily Reporter solution can be used in order to generate a daily CSV 
 The report will include new or changed resources, with a link to the AWS Config UI.
 The reporter is triggered using a CloudWatch event, that will trigger a Lambda function. The Lambda will use SES to send an email.
 
+Detailed instructions here: https://aws.amazon.com/blogs/mt/how-to-get-a-daily-report-for-your-resources-configuration-changes/
 
 ### Prerequisites
 Before getting started, make sure that you have a basic understating of the following:
