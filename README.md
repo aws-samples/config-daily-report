@@ -30,7 +30,7 @@ You will also need to have a pre-configured Multi-Account AWS Config Aggregator 
 
 
 1. ```git clone https://github.com/aws-samples/config-daily-report```
-2. ```cd config-daily-reporter/cdk```
+2. ```cd config-daily-reporte/cdk```
 3. ```cdk bootstrap```
 4. ```cdk deploy --parameters aggregator=<aggregator name> \ --parameters RECIPIENT=<recipient email address> \ --parameters SENDER=<sender email address> \ --parameters HOUR=<time in UTC (hour)> \ --parameters MINUTE==< time in UTC (minute)> \ --parameters sesarn=<Your SES ARN>```  
     Replace the parameters as follows:
